@@ -39,26 +39,32 @@ Pay Greg a visit <a href="https://game-recommendation-expert-greg.streamlit.app/
 ## Get started
 
 1. Clone the repository:
-    - git clone https://github.com/magnusapaulsen/greg.git
-    - cd greg
+    ```bash
+    git clone https://github.com/magnusapaulen/greg.git
+    cd greg
+    ```
 
 2. Install dependencies:
-    - pip install -r requirements.txt (pip3 install -r requirements.txt)
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-3. Get API-key, Client ID and Client Secret:
+4. Get API-key, Client ID and Client Secret:
     - Retrieve API-key from OpenAI.
     - Retrieve Client ID and Client secret from IGDB.
     - Put them inside a .env file (like shown in .env.example).
 
-4. Run the Streamlit app locally:
-    - streamlit run main.py
-
-5. Navigate the GUI:
+5. Run the Streamlit app locally:
+    ```bash
+    streamlit run main.py
+    ```
+    
+6. Navigate the GUI:
     - Select genre and mode.
     - Tell Greg what you like.
     - Hit the 'Ask Greg' button.
 
-6. Check out the technical details:
+7. Check out the technical details:
     - Click the dropdown for the technical details.
 
 ## Requirements
