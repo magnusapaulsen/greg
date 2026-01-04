@@ -2,13 +2,13 @@
 
 **Game Recommendation Expert, Greg**
 
-**Greg is a robot.**<br>
-**Greg loves video games.**<br>
-**Greg gives expert recommendations to his friends.**<br>
-**Are you one of Greg's friends?**<br>
-**There is only one way to find out...**<br>
+Greg is a robot.<br>
+Greg loves video games.<br>
+Greg gives expert recommendations to his friends.<br>
+Are you one of Greg's friends?<br>
+There is only one way to find out...<br>
 
-Check it out <a href="https://game-recommendation-expert-greg.streamlit.app/">here</a>.
+Pay Greg a visit <a href="https://game-recommendation-expert-greg.streamlit.app/">here</a>.
 
 ## Features
 - Input form with **combo boxes** and **radio buttons**
@@ -39,27 +39,27 @@ Check it out <a href="https://game-recommendation-expert-greg.streamlit.app/">he
 ## Get started
 
 1. Clone the repository:
-    git clone https://github.com/magnusapaulsen/greg.git
-    cd greg
+    - git clone https://github.com/magnusapaulsen/greg.git
+    - cd greg
 
 2. Install dependencies:
-    pip install -r requirements.txt (pip3 install -r requirements.txt)
+    - pip install -r requirements.txt (pip3 install -r requirements.txt)
 
 3. Get API-key, Client ID and Client Secret:
-    Retrieve API-key from OpenAI.
-    Retrieve Client ID and Client secret from IGDB.
-    Put them inside a .env file (like shown in .env.example).
+    - Retrieve API-key from OpenAI.
+    - Retrieve Client ID and Client secret from IGDB.
+    - Put them inside a .env file (like shown in .env.example).
 
 4. Run the Streamlit app locally:
-    streamlit run main.py
+    - streamlit run main.py
 
 5. Navigate the GUI:
-    Select genre and mode.
-    Tell Greg what you like.
-    Hit the 'Ask Greg' button.
+    - Select genre and mode.
+    - Tell Greg what you like.
+    - Hit the 'Ask Greg' button.
 
 6. Check out the technical details:
-    Click the dropdown for the technical details.
+    - Click the dropdown for the technical details.
 
 ## Requirements
 - `openai`
