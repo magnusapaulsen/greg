@@ -7,7 +7,7 @@ Select ONE real video game that best matches the user’s preferences.
 # CONSTRAINTS
 - Must be a real game
 - Must NOT appear in the user input
-- Prefer releases after 2015 unless unavoidable
+- Prefer releases after {cutoff_year} unless unavoidable
 
 # OUTPUT FORMAT (CRITICAL)
 Respond using EXACTLY this format:

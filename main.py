@@ -2,20 +2,23 @@ import streamlit as st
 from streamlit_searchbox import st_searchbox
 import api
 import time
+from datetime import datetime
 
 def main():
-    st.set_page_config(page_title = 'GREG - Game Recommendation Expert, Greg', page_icon = '🤖', layout = 'wide', initial_sidebar_state = 'auto')
-    
+    st.set_page_config(page_title = 'GREG - Game Recommendation Expert, Greg', page_icon = '🤖', layout = 'centered', initial_sidebar_state = 'auto')
+
+    api.validate_secrets()
+
     # Row 1 - Title
-    row_1_column_1, row_1_column_2, row_1_column_3 = st.columns([1, 5, 1])
-    with row_1_column_2:
-        st.title('GREG', width = 'stretch', text_alignment = 'center')
-        st.header('Game Recommendation Expert, Greg', width = 'stretch', text_alignment = 'center')
+    st.title('GREG', width = 'stretch', text_alignment = 'center')
+    st.header('Game Recommendation Expert, Greg', width = 'stretch', text_alignment = 'center')
 
     # Row 2 - Genre and Mode
+    FALLBACK_GENRES = ['Action', 'Action-Adventure', 'Adventure', 'Battle Royale', 'Card Battler', 'Casual', 'Deckbuilder', 'Fighting', 'First-Person Shooter (FPS)', 'Horror', 'Idle', 'Match-3', 'MMORPG', 'MOBA', 'Music/Rhythm', 'Party', 'Platformer', 'Puzzle', 'Racing', 'Role-Playing (RPG)', 'Roguelike', 'Roguelite', 'Sandbox/Open-World', 'Shooter', 'Simulation', 'Souls-like', 'Sports', 'Strategy', 'Survival']
+    genres = api.get_genres() or FALLBACK_GENRES
     row_2_column_1, row_2_column_2 = st.columns([1, 1])
     with row_2_column_1:
-        genre = st.selectbox('Genre', ['Action', 'Action-Adventure', 'Adventure', 'Battle Royale', 'Card Battler', 'Casual', 'Deckbuilder', 'Fighting', 'First-Person Shooter (FPS)', 'Horror', 'Idle', 'Match-3', 'MMORPG', 'MOBA', 'Music/Rhythm', 'Party', 'Platformer', 'Puzzle', 'Racing', 'Role-Playing (RPG)', 'Roguelike', 'Roguelite', 'Sandbox/Open-World', 'Shooter', 'Simulation', 'Souls-like', 'Sports', 'Strategy', 'Survival'])
+        genre = st.selectbox('Genre', genres)
     with row_2_column_2:
         mode = st.radio('Mode', options = ['Singleplayer', 'Multiplayer'], horizontal = True)
 
@@ -35,52 +38,79 @@ def main():
 
     st.divider()
 
-# Button Row
-    row_4_column_1, row_4_column_2, row_4_column_3 = st.columns([1, 5, 1])
-    with row_4_column_2:
-        if st.button('Ask Greg', type = 'primary', use_container_width = True):
-            if not any([art_game, music_game, story_game, gameplay_game]):
-                st.warning('Greg is going to need more than that...')
-            else:
-                # Start timer
-                start_time = time.time()
-                
-                with st.spinner('Greg is thinking...'):
-                    user_input = (
-                        f'Genre: {genre}. Mode: {mode}. '
-                        f'Art like: {art_game}. Music like: {music_game}. '
-                        f'Story like: {story_game}. Gameplay like: {gameplay_game}.'
-                    )
-                    
-                    instructions = api.get_instructions('instructions.txt')
+    # Button Row
+    if st.button('Ask Greg', type = 'primary', use_container_width = True):
+        if not any([art_game, music_game, story_game, gameplay_game]):
+            st.warning('Greg is going to need more than that...')
+        else:
+            # Clear any previous result and start fresh
+            st.session_state.pop('result', None)
+            st.session_state.pop('balloons_shown', None)
+
+            # Start timer
+            start_time = time.time()
+
+            with st.spinner('Greg is thinking...'):
+                user_input = (
+                    f'Genre: {genre}. Mode: {mode}. '
+                    f'Art like: {art_game}. Music like: {music_game}. '
+                    f'Story like: {story_game}. Gameplay like: {gameplay_game}.'
+                )
+
+                instructions = api.get_instructions('instructions.txt')
+                if instructions:
+                    cutoff_year = datetime.now().year - 7
+                    instructions = instructions.format(cutoff_year=cutoff_year)
                     recommendation = api.get_recommendation(instructions, user_input)
-                    # End timer
-                    end_time = time.time()
-                    total_time = round(end_time - start_time, 2)
+                    if recommendation:
+                        end_time = time.time()
+                        title = recommendation.output_text
+                        details = api.get_game_details(title)
+                        st.session_state['result'] = {
+                            'title': title,
+                            'details': details,
+                            'usage': recommendation.usage,
+                            'time': round(end_time - start_time, 2),
+                        }
 
-                    # Output
-                    st.write('### 🎯 Greg Recommends:')
-                    st.write(f'## {recommendation.output_text}')
-                    
-                    # Balloon-break 🥳
-                    st.balloons()
+    # Render result from session state (persists across rerenders)
+    if 'result' in st.session_state:
+        result = st.session_state['result']
+        details = result.get('details')
 
-                    st.divider()
+        st.write('### 🎯 Greg Recommends:')
 
-                    # Techinal details
-                    with st.expander("📊 View technical details"):
-                        usage = getattr(recommendation, "usage", None)
-                                        
-                        if usage:
-                            input_tokens = getattr(usage, "input_tokens", 0)
-                            output_tokens = getattr(usage, "output_tokens", 0)
-                            total_tokens = getattr(usage, "total_tokens", 0)
-                                            
-                            m1, m2, m3, m4 = st.columns(4)
-                            m1.metric('Input tokens', input_tokens)
-                            m2.metric('Output tokens', output_tokens)
-                            m3.metric('Total tokens', total_tokens)
-                            m4.metric('Time', f'{total_time}s')
+        if details and details.get('cover_url'):
+            cover_col, text_col = st.columns([1, 3])
+            with cover_col:
+                st.image(details['cover_url'])
+            with text_col:
+                st.write(f'## {result["title"]}')
+                if details.get('summary'):
+                    st.write(details['summary'])
+        else:
+            st.write(f'## {result["title"]}')
+
+        # Fire balloons only once per new recommendation
+        if not st.session_state.get('balloons_shown'):
+            st.balloons()
+            st.session_state['balloons_shown'] = True
+
+        st.divider()
+
+        # Technical details
+        with st.expander("📊 View technical details"):
+            usage = result['usage']
+            if usage:
+                input_tokens = getattr(usage, "input_tokens", 0)
+                output_tokens = getattr(usage, "output_tokens", 0)
+                total_tokens = getattr(usage, "total_tokens", 0)
+
+                m1, m2, m3, m4 = st.columns(4)
+                m1.metric('Input tokens', input_tokens)
+                m2.metric('Output tokens', output_tokens)
+                m3.metric('Total tokens', total_tokens)
+                m4.metric('Time', f'{result["time"]}s')
 
 if __name__ == '__main__':
     main()
